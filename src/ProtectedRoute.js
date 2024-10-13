@@ -1,12 +1,36 @@
-import React, { useContext } from 'react';
+// src/ProtectedRoute.js
+import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { AuthContext } from './AuthContext';
+import { Auth } from 'aws-amplify';
 
-function ProtectedRoute({ element }) {
-  const { token } = useContext(AuthContext);
+const ProtectedRoute = ({ element }) => {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // If there is no token, redirect to the login page
-  return token ? element : <Navigate to="/login" />;
-}
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await Auth.currentAuthenticatedUser(); // Check if a user is authenticated
+        setAuthenticated(true);
+      } catch (error) {
+        setAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return <p>Loading...</p>; // Display loading while checking authentication
+  }
+
+  if (!authenticated) {
+    return <Navigate to="/login" />; // Redirect to login if user is not authenticated
+  }
+
+  return element;
+};
 
 export default ProtectedRoute;

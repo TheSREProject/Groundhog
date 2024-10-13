@@ -1,15 +1,34 @@
-import React, { useContext } from 'react';
+// src/Navbar.js
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from './AuthContext';
+import { Auth } from 'aws-amplify';
 import './Navbar.css';
 
 function Navbar() {
-  const { token, logout } = useContext(AuthContext);
+  const [authenticated, setAuthenticated] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await Auth.currentAuthenticatedUser(); // Check if the user is authenticated
+        setAuthenticated(true);
+      } catch (error) {
+        setAuthenticated(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await Auth.signOut(); // Sign out the user using Amplify
+      setAuthenticated(false);
+      navigate('/login'); // Redirect to login after logout
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
@@ -24,13 +43,13 @@ function Navbar() {
         <li>
           <Link to="/contact">Contact</Link>
         </li>
-        {token ? (
+        {authenticated ? (
           <>
             <li>
               <Link to="/account">Account</Link>
             </li>
             <li>
-              <Link onClick={handleLogout}>Logout</Link>
+              <button onClick={handleLogout} className="logout-button">Logout</button>
             </li>
           </>
         ) : (

@@ -1,0 +1,33 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-groundhog-dev-8d7e8-authRole",
+      "UnauthRoleArn": "arn:aws:iam::108848835320:role/amplify-groundhog-dev-8d7e8-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::108848835320:role/amplify-groundhog-dev-8d7e8-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-groundhog-dev-8d7e8-deployment",
+      "UnauthRoleName": "amplify-groundhog-dev-8d7e8-unauthRole",
+      "StackName": "amplify-groundhog-dev-8d7e8",
+      "StackId": "arn:aws:cloudformation:us-east-1:108848835320:stack/amplify-groundhog-dev-8d7e8/0a4d9b70-8972-11ef-8710-0ef5ed42bf47",
+      "AmplifyAppId": "d3gg5a4ch59doa"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d3gg5a4ch59doa",
+          "type": "cicd"
+        }
+      },
+      "auth": {
+        "groundhogAuth": {}
+      },
+      "function": {
+        "groundhogAuthDefineAuthChallenge": {},
+        "groundhogAuthCreateAuthChallenge": {},
+        "groundhogAuthVerifyAuthChallengeResponse": {
+          "RECAPTCHASECRET": "6Ld8uV8qAAAAAJ2T61tJq3u6PV-PsdT8kWIDFBqb"
+        }
+      }
+    }
+  }
+}

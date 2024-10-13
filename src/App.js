@@ -11,6 +11,10 @@ import Register from './Register';
 import ProtectedRoute from './ProtectedRoute';
 import { AuthProvider } from './AuthContext';
 import './App.css';
+import Amplify from 'aws-amplify';
+import awsExports from './aws-exports'; // AWS Amplify configuration
+
+Amplify.configure(awsExports);
 
 function App() {
   return (

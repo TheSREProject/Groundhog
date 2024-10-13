@@ -1,6 +1,7 @@
+// src/Register.js
 import React, { useState } from 'react';
+import { Auth } from 'aws-amplify'; // Import Auth from Amplify
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import axios from 'axios';
 import zxcvbn from 'zxcvbn'; // Password strength library
 import './Register.css';
 
@@ -12,9 +13,6 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordVisibleConfirm, setPasswordVisibleConfirm] = useState(false); // For confirm password
-  const [cardNumber, setCardNumber] = useState('');
-  const [expirationDate, setExpirationDate] = useState('');
-  const [cvv, setCvv] = useState('');
   const [step, setStep] = useState(1); // Multi-step form tracker
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -43,20 +41,17 @@ function Register() {
     setError(null);
 
     try {
-      const token = await executeRecaptcha('register');
+      const recaptchaToken = await executeRecaptcha('register');
       setLoading(true);
 
-      // Send registration data to the backend
-      await axios.post('http://localhost:5000/api/register', {
-        name,
-        organization: organization ? organization : null, // Send organization only if provided
-        email,
+      // Use Amplify Auth to sign up the user
+      await Auth.signUp({
+        username: email,
         password,
-        recaptchaToken: token,
-        paymentInfo: {
-          cardNumber,
-          expirationDate,
-          cvv,
+        attributes: {
+          email,
+          name,
+          'custom:organization': organization || null, // Store organization if provided
         },
       });
 
@@ -67,11 +62,8 @@ function Register() {
       setEmail('');
       setPassword('');
       setConfirmPassword('');
-      setCardNumber('');
-      setExpirationDate('');
-      setCvv('');
     } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred during registration.');
+      setError(err.message || 'An error occurred during registration.');
     } finally {
       setLoading(false);
     }
@@ -81,7 +73,7 @@ function Register() {
     <div className="register-container">
       <h1>Register</h1>
       {success ? (
-        <p>Registration successful! You can now log in.</p>
+        <p>Registration successful! Please check your email to confirm your account.</p>
       ) : (
         <form className="register-form" onSubmit={step === 1 ? handleNextStep : handleSubmit}>
           {step === 1 && (
@@ -180,7 +172,7 @@ function Register() {
 
           {step === 2 && (
             <>
-              {/* Step 2: Payment Information */}
+              {/* Step 2: Payment Information (optional) */}
               <div className="form-group">
                 <label htmlFor="card-number">Card Number</label>
                 <input

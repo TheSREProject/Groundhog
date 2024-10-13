@@ -1,44 +1,29 @@
-import React, { useState, useContext } from 'react';
-import axios from 'axios';
+// src/Login.js
+import React, { useState } from 'react';
+import { Auth } from 'aws-amplify'; // Import Auth from Amplify
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from './AuthContext'; // Import AuthContext
 
 function Login() {
-  const { login } = useContext(AuthContext); // Use login function from context
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage(null);
     setError(null);
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
-        email,
-        password,
-      });
+      // Use Amplify Auth to sign in
+      const user = await Auth.signIn(email, password);
+      console.log('User signed in successfully:', user);
 
-      setMessage(response.data.message);
-      setEmail('');
-      setPassword('');
-
-      const token = response.data.token;
-
-      // Call login function from AuthContext to update state and localStorage
-      login(token);
-
-      // Navigate to home page after login
+      // Redirect to home page after successful login
       navigate('/');
     } catch (err) {
-      setError(
-        err.response?.data?.error || 'An error occurred while logging in.'
-      );
+      setError(err.message || 'An error occurred during login.');
     } finally {
       setLoading(false);
     }
@@ -75,7 +60,6 @@ function Login() {
         </button>
       </form>
 
-      {message && <p className="success-message">{message}</p>}
       {error && <p className="error-message">{error}</p>}
     </div>
   );
