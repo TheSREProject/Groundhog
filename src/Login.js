@@ -1,6 +1,6 @@
 // src/Login.js
 import React, { useState } from 'react';
-import { Auth } from 'aws-amplify'; // Import Auth from Amplify
+import { Auth } from 'aws-amplify';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {

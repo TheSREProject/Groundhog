@@ -1,6 +1,6 @@
 // src/Register.js
 import React, { useState } from 'react';
-import { Auth } from 'aws-amplify'; // Import Auth from Amplify
+import { Auth } from 'aws-amplify';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import zxcvbn from 'zxcvbn'; // Password strength library
 import './Register.css';
