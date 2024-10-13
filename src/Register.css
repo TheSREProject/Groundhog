@@ -1,0 +1,97 @@
+.register-container {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .register-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    font-weight: bold;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+  }
+  
+  .password-strength {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .password-strength meter {
+    width: 100%;
+  }
+  
+  .social-signin {
+    margin-top: 20px;
+  }
+  
+  .social-signin button {
+    margin-right: 10px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  button {
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  .error-message {
+    color: red;
+    margin-bottom: 15px;
+  }
+  
+  .password-strength {
+    margin-top: 10px;
+  }
+  
+  .password-strength meter {
+    width: 100%;
+  }
+  
+  .password-strength p {
+    margin-top: 5px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .password-input-wrapper {
+    display: flex;
+    align-items: center;
+  }
+  
+  .password-input-wrapper input {
+    flex: 1;
+  }
+  
+  .toggle-password {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 5px;
+    color: #007bff;
+    font-size: 14px;
+  }
+  

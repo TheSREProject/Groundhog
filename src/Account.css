@@ -1,0 +1,123 @@
+/* General Styles */
+.account-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f7f9fc;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.account-title {
+  text-align: center;
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.account-card {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Align labels, values, and buttons */
+.account-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.account-field label {
+  font-weight: bold;
+  flex-basis: 40%;
+}
+
+.account-field span {
+  flex-basis: 50%;
+  text-align: left;
+}
+
+/* Move Edit buttons to the right */
+.field-view {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.field-view button {
+  margin-left: auto; /* Pushes the button to the right */
+}
+
+.field-edit {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+}
+
+.field-buttons {
+  display: flex;
+  gap: 10px;
+  margin-left: 10px;
+}
+
+/* Input Styles */
+.form-input {
+  padding: 10px;
+  font-size: 1rem;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.save-button, .cancel-button, .edit-button {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+}
+
+.cancel-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+}
+
+.edit-button {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+}
+
+.save-button:hover {
+  background-color: #45a049;
+}
+
+.cancel-button:hover {
+  background-color: #e53935;
+}
+
+.edit-button:hover {
+  background-color: #1976d2;
+}
+
+/* Messages */
+.success-message {
+  color: #4caf50;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  color: #f44336;
+  margin-bottom: 20px;
+}
