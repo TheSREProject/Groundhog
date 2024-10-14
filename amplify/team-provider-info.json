@@ -19,7 +19,8 @@
         }
       },
       "auth": {
-        "groundhogAuth": {}
+        "groundhogAuth": {},
+        "groundhog481e6077": {}
       },
       "function": {
         "groundhogAuthDefineAuthChallenge": {},

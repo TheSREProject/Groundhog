@@ -1,35 +1,70 @@
-// src/Navbar.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Auth } from 'aws-amplify';
+import { CognitoIdentityProviderClient, GlobalSignOutCommand } from "@aws-sdk/client-cognito-identity-provider";
+import awsmobile from './aws-exports';
 import './Navbar.css';
 
 function Navbar() {
   const [authenticated, setAuthenticated] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        await Auth.currentAuthenticatedUser(); // Check if the user is authenticated
-        setAuthenticated(true);
-      } catch (error) {
-        setAuthenticated(false);
-      }
-    };
+  // Create the Cognito client with useMemo to prevent re-creation on each render
+  const client = useMemo(() => new CognitoIdentityProviderClient({ region: awsmobile.aws_project_region }), []);
 
-    checkAuth();
-  }, []);
+  const checkAuth = () => {
+    const accessToken = localStorage.getItem('accessToken');
+    setAuthenticated(!!accessToken);
+  };
 
   const handleLogout = async () => {
-    try {
-      await Auth.signOut(); // Sign out the user using Amplify
+    const accessToken = localStorage.getItem('accessToken');
+    
+    if (!accessToken) {
+      console.error('No access token found. Cannot sign out.');
       setAuthenticated(false);
-      navigate('/login'); // Redirect to login after logout
-    } catch (error) {
-      console.error('Error signing out:', error);
+      localStorage.clear();
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const command = new GlobalSignOutCommand({
+        AccessToken: accessToken,
+      });
+
+      await client.send(command);
+      console.log('Logout successful');
+      
+      // Clear tokens from local storage
+      localStorage.clear();
+      setAuthenticated(false);
+      navigate('/login');
+    } catch (err) {
+      if (err.name === 'NotAuthorizedException') {
+        console.warn('Access token is invalid or expired. Logging out locally.');
+        localStorage.clear();
+        setAuthenticated(false);
+        navigate('/login');
+      } else {
+        console.error('Error signing out:', err);
+      }
     }
   };
+
+  // Listen to localStorage changes for login/logout events
+  useEffect(() => {
+    checkAuth();
+
+    const handleStorageChange = () => {
+      checkAuth(); // Update authentication state when tokens are added/removed from localStorage
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   return (
     <nav className="navbar">

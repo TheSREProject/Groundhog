@@ -1,13 +1,13 @@
-// src/Login.js
 import React, { useState } from 'react';
-import { Auth } from 'aws-amplify';
 import { useNavigate } from 'react-router-dom';
+import { CognitoIdentityProviderClient, InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
+import awsExports from './aws-exports'; // Make sure aws-exports.js is correctly configured for your Cognito
 
-function Login() {
+const Login = () => {  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -15,15 +15,33 @@ function Login() {
     setError(null);
     setLoading(true);
 
-    try {
-      // Use Amplify Auth to sign in
-      const user = await Auth.signIn(email, password);
-      console.log('User signed in successfully:', user);
+    const client = new CognitoIdentityProviderClient({ region: awsExports.aws_project_region });
+    const command = new InitiateAuthCommand({
+      AuthFlow: 'USER_PASSWORD_AUTH',
+      ClientId: awsExports.aws_user_pools_web_client_id,
+      AuthParameters: {
+        USERNAME: email,
+        PASSWORD: password
+      }
+    });
 
-      // Redirect to home page after successful login
+    try {
+      const response = await client.send(command);
+      console.log('Login successful:', response);
+
+      // Store tokens in localStorage
+      localStorage.setItem('idToken', response.AuthenticationResult.IdToken);
+      localStorage.setItem('accessToken', response.AuthenticationResult.AccessToken);
+      localStorage.setItem('refreshToken', response.AuthenticationResult.RefreshToken);
+
+      // Manually trigger the storage event to notify other components (e.g., Navbar)
+      window.dispatchEvent(new Event('storage'));
+
+      // Redirect to homepage after successful login
       navigate('/');
     } catch (err) {
-      setError(err.message || 'An error occurred during login.');
+      console.error('Error during login:', err);
+      setError(err.message || 'Error during login');
     } finally {
       setLoading(false);
     }
@@ -59,10 +77,9 @@ function Login() {
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
-
       {error && <p className="error-message">{error}</p>}
     </div>
   );
-}
+};
 
 export default Login;

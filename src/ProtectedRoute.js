@@ -1,22 +1,20 @@
-// src/ProtectedRoute.js
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Auth } from 'aws-amplify';
 
 const ProtectedRoute = ({ element }) => {
   const [authenticated, setAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Add loading state to delay rendering
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        await Auth.currentAuthenticatedUser(); // Check if a user is authenticated
-        setAuthenticated(true);
-      } catch (error) {
-        setAuthenticated(false);
-      } finally {
-        setLoading(false);
+    const checkAuth = () => {
+      const token = localStorage.getItem('accessToken'); // Fetch token from localStorage
+
+      if (token) {
+        setAuthenticated(true); // User is authenticated
+      } else {
+        setAuthenticated(false); // No token found, user is not authenticated
       }
+      setLoading(false); // Token check is complete
     };
 
     checkAuth();
