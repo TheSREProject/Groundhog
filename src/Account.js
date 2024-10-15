@@ -1,84 +1,100 @@
-import React, { useEffect, useState } from 'react';
-import { CognitoIdentityProviderClient, GetUserCommand, UpdateUserAttributesCommand } from "@aws-sdk/client-cognito-identity-provider";
-import awsmobile from './aws-exports';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { CognitoIdentityProviderClient, GetUserCommand, UpdateUserAttributesCommand } from '@aws-sdk/client-cognito-identity-provider';
+import awsExports from './aws-exports';
 import './Account.css';
 
 function Account() {
-  const [accountData, setAccountData] = useState(null);
+  const [accountData, setAccountData] = useState({
+    id: '',
+    name: '',
+    email: '', // Non-editable
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
-  // Individual edit modes for each field
+  // Edit mode for the name field
   const [editName, setEditName] = useState(false);
-  const [editEmail, setEditEmail] = useState(false);
 
-  const fetchAccountData = async () => {
+  // AWS Cognito client
+  const client = useMemo(() => new CognitoIdentityProviderClient({ region: awsExports.aws_project_region }), []);
+
+  // Fetch account data from Cognito
+  const fetchAccountData = useCallback(async () => {
     try {
-      const accessToken = localStorage.getItem('accessToken'); // Get access token from localStorage
-
+      const accessToken = localStorage.getItem('accessToken');
       if (!accessToken) {
         setError('No token found. Please log in.');
         setLoading(false);
         return;
       }
 
-      const client = new CognitoIdentityProviderClient({ region: awsmobile.aws_project_region });
       const command = new GetUserCommand({
         AccessToken: accessToken,
       });
 
       const response = await client.send(command);
 
+      const userAttributes = response.UserAttributes.reduce((acc, attribute) => {
+        acc[attribute.Name] = attribute.Value;
+        return acc;
+      }, {});
+
       setAccountData({
-        id: response.Username,
-        name: response.UserAttributes.find(attr => attr.Name === 'name')?.Value || '',
-        email: response.UserAttributes.find(attr => attr.Name === 'email')?.Value || '',
+        id: userAttributes.sub,
+        name: userAttributes.name || '',
+        email: userAttributes.email || '', // Non-editable email
       });
+
     } catch (err) {
       setError('Failed to fetch account data.');
-      console.error(err);
+      console.error('Error fetching account data:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [client]);
 
+  useEffect(() => {
+    fetchAccountData();
+  }, [fetchAccountData]);
+
+  // Handle input changes for the name field
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setAccountData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  // Handle saving changes for the name field
   const handleSaveChanges = async () => {
     try {
       const accessToken = localStorage.getItem('accessToken');
-      const client = new CognitoIdentityProviderClient({ region: awsmobile.aws_project_region });
-      
+      if (!accessToken) {
+        setError('No token found. Please log in again.');
+        return;
+      }
+
       const command = new UpdateUserAttributesCommand({
         AccessToken: accessToken,
         UserAttributes: [
           { Name: 'name', Value: accountData.name },
-          { Name: 'email', Value: accountData.email },
         ],
       });
 
-      const result = await client.send(command);
+      const response = await client.send(command);
+      console.log('Account updated successfully:', response);
 
       setUpdateSuccess(true);
       setEditName(false);
-      setEditEmail(false);
-      console.log('User attributes updated:', result);
 
-      // Optionally refetch the updated account data
-      fetchAccountData();
     } catch (err) {
-      setError('Failed to update account information.');
-      console.error(err);
+      console.error('Error updating account information:', err);
+      if (err.name === 'NotAuthorizedException') {
+        setError('Session has expired. Please log in again.');
+      } else {
+        setError('Failed to update account information.');
+      }
     }
   };
-
-  useEffect(() => {
-    fetchAccountData();
-  }, []);
 
   if (loading) return <p>Loading account data...</p>;
   if (error) return <p className="error-message">{error}</p>;
@@ -93,6 +109,12 @@ function Account() {
         <div className="account-field">
           <label>User ID:</label>
           <span>{accountData.id}</span>
+        </div>
+
+        {/* Email Field (Non-editable) */}
+        <div className="account-field">
+          <label htmlFor="email">Email:</label>
+          <span>{accountData.email}</span>
         </div>
 
         {/* Name Field */}
@@ -117,32 +139,6 @@ function Account() {
             <div className="field-view">
               <span>{accountData.name}</span>
               <button className="edit-button" onClick={() => setEditName(true)}>Edit</button>
-            </div>
-          )}
-        </div>
-
-        {/* Email Field */}
-        <div className="account-field">
-          <label htmlFor="email">Email:</label>
-          {editEmail ? (
-            <div className="field-edit">
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={accountData.email}
-                onChange={handleInputChange}
-                className="form-input"
-              />
-              <div className="field-buttons">
-                <button className="save-button" onClick={handleSaveChanges}>Save</button>
-                <button className="cancel-button" onClick={() => setEditEmail(false)}>Cancel</button>
-              </div>
-            </div>
-          ) : (
-            <div className="field-view">
-              <span>{accountData.email}</span>
-              <button className="edit-button" onClick={() => setEditEmail(true)}>Edit</button>
             </div>
           )}
         </div>

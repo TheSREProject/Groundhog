@@ -27,7 +27,15 @@
         "groundhogAuthCreateAuthChallenge": {},
         "groundhogAuthVerifyAuthChallengeResponse": {
           "RECAPTCHASECRET": "6Ld8uV8qAAAAAJ2T61tJq3u6PV-PsdT8kWIDFBqb"
+        },
+        "reCaptchaVerification": {
+          "deploymentBucketName": "amplify-groundhog-dev-8d7e8-deployment",
+          "s3Key": "amplify-builds/reCaptchaVerification-4738704151715278506b-build.zip",
+          "recaptchaSecretKey": "6Ld8uV8qAAAAAJ2T61tJq3u6PV-PsdT8kWIDFBqb"
         }
+      },
+      "api": {
+        "reCaptchaVerificationAPI": {}
       }
     }
   }

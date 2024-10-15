@@ -1,0 +1,9 @@
+{
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "recaptchaSecretKey",
+      "environmentVariableName": "RECAPTCHA_SECRET_KEY"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "paths": {
+    "/recaptcha": {
+      "name": "/recaptcha",
+      "lambdaFunction": "reCaptchaVerification",
+      "permissions": {
+        "setting": "open"
+      }
+    }
+  }
+}
