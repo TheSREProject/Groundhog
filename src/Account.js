@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { CognitoIdentityProviderClient, GetUserCommand, UpdateUserAttributesCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { CognitoIdentityProviderClient, GetUserCommand, UpdateUserAttributesCommand, ChangePasswordCommand } from '@aws-sdk/client-cognito-identity-provider';
 import awsExports from './aws-exports';
 import './Account.css';
 
@@ -12,6 +12,12 @@ function Account() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(false);
+
+  // Password-related states
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [repeatPassword, setRepeatPassword] = useState('');
 
   // Edit mode for the name field
   const [editName, setEditName] = useState(false);
@@ -80,12 +86,9 @@ function Account() {
         ],
       });
 
-      const response = await client.send(command);
-      console.log('Account updated successfully:', response);
-
+      await client.send(command);
       setUpdateSuccess(true);
       setEditName(false);
-
     } catch (err) {
       console.error('Error updating account information:', err);
       if (err.name === 'NotAuthorizedException') {
@@ -96,6 +99,37 @@ function Account() {
     }
   };
 
+  // Handle password change
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (newPassword !== repeatPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+        setError('No token found. Please log in.');
+        return;
+      }
+
+      const command = new ChangePasswordCommand({
+        AccessToken: accessToken,
+        PreviousPassword: currentPassword,
+        ProposedPassword: newPassword,
+      });
+
+      await client.send(command);
+      setPasswordChangeSuccess(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setRepeatPassword('');
+    } catch (err) {
+      setError('Failed to change password.');
+    }
+  };
+
   if (loading) return <p>Loading account data...</p>;
   if (error) return <p className="error-message">{error}</p>;
 
@@ -103,6 +137,7 @@ function Account() {
     <div className="account-container">
       <h1 className="account-title">Your Account</h1>
       {updateSuccess && <p className="success-message">Account updated successfully!</p>}
+      {passwordChangeSuccess && <p className="success-message">Password changed successfully!</p>}
 
       <div className="account-card">
         {/* User ID */}
@@ -141,6 +176,41 @@ function Account() {
               <button className="edit-button" onClick={() => setEditName(true)}>Edit</button>
             </div>
           )}
+        </div>
+
+        {/* Password Change Section */}
+        <div className="password-change-section">
+          <h2>Change Password</h2>
+          <form onSubmit={handlePasswordChange}>
+            <div className="form-group">
+              <label>Current Password:</label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>New Password:</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Repeat New Password:</label>
+              <input
+                type="password"
+                value={repeatPassword}
+                onChange={(e) => setRepeatPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit">Change Password</button>
+          </form>
         </div>
       </div>
     </div>
