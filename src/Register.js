@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleReCaptcha } from 'react-google-recaptcha-v3'; // Import Google reCAPTCHA
 import axios from 'axios'; // Axios to make API calls
+import zxcvbn from 'zxcvbn'; // Import zxcvbn for password strength check
 import { CognitoIdentityProviderClient, SignUpCommand, ConfirmSignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
 import awsmobile from './aws-exports';
+import './Register.css'; // Import CSS for styling
 
 function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState(''); // Added state for repeat password
+  const [passwordStrength, setPasswordStrength] = useState(null); // Password strength state
   const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -25,6 +28,14 @@ function Register() {
   // Callback function to get the reCAPTCHA token
   const handleVerifyCaptcha = (token) => {
     setCaptchaToken(token); // Save token in state
+  };
+
+  // Function to check password strength using zxcvbn
+  const handlePasswordChange = (e) => {
+    const passwordInput = e.target.value;
+    setPassword(passwordInput);
+    const result = zxcvbn(passwordInput);
+    setPasswordStrength(result.score); // zxcvbn score is between 0 and 4
   };
 
   const handleSubmit = async (e) => {
@@ -127,9 +138,21 @@ function Register() {
                 type="password"
                 placeholder="Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange} // Check password strength on change
                 required
               />
+              {/* Display password strength meter */}
+              {password && (
+                <div className="password-strength">
+                  <meter
+                    min="0"
+                    max="4"
+                    value={passwordStrength || 0} // Set default to 0
+                    id="password-strength-meter"
+                  ></meter>
+                  <p>Password Strength: {['Weak', 'Fair', 'Good', 'Strong', 'Very Strong'][passwordStrength]}</p>
+                </div>
+              )}
               <input
                 type="password"
                 placeholder="Repeat Password" // Input for repeat password
@@ -153,7 +176,7 @@ function Register() {
           )}
         </form>
       )}
-      {error && <p>{error}</p>}
+      {error && <p className="error-message">{error}</p>}
     </div>
   );
 }
