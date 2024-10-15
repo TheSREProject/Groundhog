@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { CognitoIdentityProviderClient, InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
 import awsExports from './aws-exports'; // Make sure aws-exports.js is correctly configured for your Cognito
 
@@ -78,6 +78,9 @@ const Login = () => {
         </button>
       </form>
       {error && <p className="error-message">{error}</p>}
+      <p>
+        <Link to="/forgot-password">Forgot your password?</Link> {/* Add forgot password link */}
+      </p>
     </div>
   );
 };

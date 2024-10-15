@@ -11,6 +11,7 @@ import Contact from './Contact';
 import Register from './Register';
 import Verify from './Verify';
 import Login from './Login';  // Import the Login component
+import ForgotPassword from './ForgotPassword';  // Import the ForgotPassword component
 import './App.css';
 
 Amplify.configure(awsExports);
@@ -32,6 +33,7 @@ function App() {
               <Route path="/verify" element={<Verify />} />
               <Route path="/login" element={<Login setAuthenticated={setAuthenticated} />} />  {/* Pass setAuthenticated */}
               <Route path="/account" element={<Account />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />  {/* Add ForgotPassword route */}
             </Routes>
           </main>
         </div>
