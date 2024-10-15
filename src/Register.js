@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GoogleReCaptcha } from 'react-google-recaptcha-v3'; // Import Google reCAPTCHA
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'; // Use hook instead of component
 import axios from 'axios'; // Axios to make API calls
 import zxcvbn from 'zxcvbn'; // Import zxcvbn for password strength check
 import { CognitoIdentityProviderClient, SignUpCommand, ConfirmSignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
@@ -19,16 +19,9 @@ function Register() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [storedEmail, setStoredEmail] = useState('');
   const navigate = useNavigate();
+  const { executeRecaptcha } = useGoogleReCaptcha(); // Hook to execute reCAPTCHA
 
   const client = new CognitoIdentityProviderClient({ region: awsmobile.aws_project_region });
-
-  // Set up state to capture the reCAPTCHA token
-  const [captchaToken, setCaptchaToken] = useState(null);
-
-  // Callback function to get the reCAPTCHA token
-  const handleVerifyCaptcha = (token) => {
-    setCaptchaToken(token); // Save token in state
-  };
 
   // Function to check password strength using zxcvbn
   const handlePasswordChange = (e) => {
@@ -58,17 +51,23 @@ function Register() {
           ConfirmationCode: verificationCode,
         };
         const command = new ConfirmSignUpCommand(params);
-        const response = await client.send(command);
-        console.log('User confirmed successfully:', response);
+        await client.send(command);
+        console.log('User confirmed successfully:');
         setSuccess(true);
         navigate('/login');
       } catch (err) {
         setError(err.message || 'Error during verification');
       }
     } else {
-      // Check if we have the reCAPTCHA token before registration
-      if (!captchaToken) {
-        setError('Please complete the reCAPTCHA validation');
+      // Run reCAPTCHA only right before registration
+      if (!executeRecaptcha) {
+        setError('reCAPTCHA not available.');
+        return;
+      }
+
+      const token = await executeRecaptcha('register'); // Trigger reCAPTCHA manually
+      if (!token) {
+        setError('Failed to get reCAPTCHA token.');
         return;
       }
 
@@ -76,7 +75,7 @@ function Register() {
         // Step 1: Send reCAPTCHA token to the backend to verify it
         const recaptchaResponse = await axios.post(
           'https://vx0d3cpt5d.execute-api.us-east-1.amazonaws.com/dev/recaptcha', 
-          { token: captchaToken }, // Send the reCAPTCHA token for verification
+          { token }, // Send the reCAPTCHA token for verification
           {
             headers: {
               'Content-Type': 'application/json', // Ensure the correct headers
@@ -100,8 +99,8 @@ function Register() {
           ],
         };
         const command = new SignUpCommand(params);
-        const response = await client.send(command);
-        console.log('Registration successful:', response);
+        await client.send(command);
+        console.log('Registration successful:');
         setStoredEmail(email);
         setIsVerifying(true);
       } catch (err) {
@@ -112,7 +111,6 @@ function Register() {
 
   return (
     <div className="register-container">
-      <GoogleReCaptcha onVerify={handleVerifyCaptcha} /> {/* Add reCAPTCHA verification */}
       <h1>{isVerifying ? 'Verify Account' : 'Register'}</h1>
       {success ? (
         <p>Registration successful! You can now log in.</p>

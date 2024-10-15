@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { CognitoIdentityProviderClient, GetUserCommand, UpdateUserAttributesCommand, ChangePasswordCommand } from '@aws-sdk/client-cognito-identity-provider';
+import zxcvbn from 'zxcvbn'; // Import zxcvbn for password strength check
 import awsExports from './aws-exports';
 import './Account.css';
 
@@ -18,6 +19,7 @@ function Account() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState(null); // Password strength state
 
   // Edit mode for the name field
   const [editName, setEditName] = useState(false);
@@ -99,6 +101,14 @@ function Account() {
     }
   };
 
+  // Function to check password strength using zxcvbn
+  const handleNewPasswordChange = (e) => {
+    const passwordInput = e.target.value;
+    setNewPassword(passwordInput);
+    const result = zxcvbn(passwordInput);
+    setPasswordStrength(result.score); // zxcvbn score is between 0 and 4
+  };
+
   // Handle password change
   const handlePasswordChange = async (e) => {
     e.preventDefault();
@@ -125,6 +135,7 @@ function Account() {
       setCurrentPassword('');
       setNewPassword('');
       setRepeatPassword('');
+      setPasswordStrength(null); // Reset password strength meter
     } catch (err) {
       setError('Failed to change password.');
     }
@@ -196,9 +207,21 @@ function Account() {
               <input
                 type="password"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={handleNewPasswordChange} // Track new password changes
                 required
               />
+              {/* Password strength meter */}
+              {newPassword && (
+                <div className="password-strength">
+                  <meter
+                    min="0"
+                    max="4"
+                    value={passwordStrength || 0} // Set default to 0
+                    id="password-strength-meter"
+                  ></meter>
+                  <p>Password Strength: {['Weak', 'Fair', 'Good', 'Strong', 'Very Strong'][passwordStrength]}</p>
+                </div>
+              )}
             </div>
             <div className="form-group">
               <label>Repeat New Password:</label>
