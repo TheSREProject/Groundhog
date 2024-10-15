@@ -9,6 +9,7 @@ function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [repeatPassword, setRepeatPassword] = useState(''); // Added state for repeat password
   const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -29,6 +30,12 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
+    // Check if passwords match before proceeding with registration
+    if (!isVerifying && password !== repeatPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
     // Check if we are in verification mode
     if (isVerifying) {
@@ -121,6 +128,13 @@ function Register() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Repeat Password" // Input for repeat password
+                value={repeatPassword} // Bind to state
+                onChange={(e) => setRepeatPassword(e.target.value)} // Update repeat password state
                 required
               />
               <button type="submit">Register</button>
