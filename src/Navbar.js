@@ -1,70 +1,36 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { CognitoIdentityProviderClient, GlobalSignOutCommand } from "@aws-sdk/client-cognito-identity-provider";
-import awsmobile from './aws-exports';
+import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from './AuthContext';
+import awsExports from './aws-exports';
 import './Navbar.css';
 
 function Navbar() {
-  const [authenticated, setAuthenticated] = useState(false);
-  const navigate = useNavigate();
+  const { authenticated, logout } = useContext(AuthContext);
 
-  // Create the Cognito client with useMemo to prevent re-creation on each render
-  const client = useMemo(() => new CognitoIdentityProviderClient({ region: awsmobile.aws_project_region }), []);
+  const handleHostedUISignIn = () => {
+    const clientId = awsExports.aws_user_pools_web_client_id;
+    const redirectUri = encodeURIComponent('http://localhost:3000/');
+    // Define the scope correctly
+    const scope = 'email+openid+profile+aws.cognito.signin.user.admin+phone';
 
-  const checkAuth = () => {
-    const accessToken = localStorage.getItem('accessToken');
-    setAuthenticated(!!accessToken);
+    // Include the scope variable in the URL
+    const hostedUiUrl = `https://${awsExports.oauth.domain}/login?response_type=code&client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}`;
+
+    // Redirect to the Hosted UI for sign-in
+    window.location.href = hostedUiUrl;
   };
 
-  const handleLogout = async () => {
-    const accessToken = localStorage.getItem('accessToken');
+  const handleHostedUISignOut = () => {
+    const clientId = awsExports.aws_user_pools_web_client_id;
+    const signOutUri = `https://${awsExports.oauth.domain}/logout?client_id=${clientId}&logout_uri=http://localhost:3000/`;
     
-    if (!accessToken) {
-      console.error('No access token found. Cannot sign out.');
-      setAuthenticated(false);
-      localStorage.clear();
-      navigate('/login');
-      return;
-    }
+    // Clear tokens and global state
+    localStorage.clear();
+    logout();
 
-    try {
-      const command = new GlobalSignOutCommand({
-        AccessToken: accessToken,
-      });
-
-      await client.send(command);
-      console.log('Logout successful');
-      
-      // Clear tokens from local storage
-      localStorage.clear();
-      setAuthenticated(false);
-      navigate('/login');
-    } catch (err) {
-      if (err.name === 'NotAuthorizedException') {
-        console.warn('Access token is invalid or expired. Logging out locally.');
-        localStorage.clear();
-        setAuthenticated(false);
-        navigate('/login');
-      } else {
-        console.error('Error signing out:', err);
-      }
-    }
+    // Redirect to the Cognito Hosted UI logout endpoint
+    window.location.href = signOutUri;
   };
-
-  // Listen to localStorage changes for login/logout events
-  useEffect(() => {
-    checkAuth();
-
-    const handleStorageChange = () => {
-      checkAuth(); // Update authentication state when tokens are added/removed from localStorage
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
 
   return (
     <nav className="navbar">
@@ -72,30 +38,23 @@ function Navbar() {
         <h2>MyApp</h2>
       </div>
       <ul className="navbar-links">
-        <li>
-          <Link to="/">Home</Link>
-        </li>
-        <li>
-          <Link to="/contact">Contact</Link>
-        </li>
+        <li><Link to="/">Home</Link></li>
+        <li><Link to="/contact">Contact</Link></li>
         {authenticated ? (
           <>
+            <li><Link to="/account">Account</Link></li>
             <li>
-              <Link to="/account">Account</Link>
-            </li>
-            <li>
-              <button onClick={handleLogout} className="logout-button">Logout</button>
+              <button onClick={handleHostedUISignOut} className="logout-button">
+                Logout
+              </button>
             </li>
           </>
         ) : (
-          <>
-            <li>
-              <Link to="/register">Register</Link>
-            </li>
-            <li>
-              <Link to="/login">Login</Link>
-            </li>
-          </>
+          <li>
+            <button onClick={handleHostedUISignIn} className="login-button">
+              Register / Login
+            </button>
+          </li>
         )}
       </ul>
     </nav>

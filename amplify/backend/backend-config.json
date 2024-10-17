@@ -31,7 +31,9 @@
         "signupAttributes": [
           "EMAIL"
         ],
-        "socialProviders": [],
+        "socialProviders": [
+          "GOOGLE"
+        ],
         "usernameAttributes": [
           "EMAIL"
         ],
@@ -57,6 +59,14 @@
     }
   },
   "parameters": {
+    "AMPLIFY_auth_groundhog481e6077_googleClientId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "groundhog481e6077"
+        }
+      ]
+    },
     "AMPLIFY_function_groundhogAuthVerifyAuthChallengeResponse_RECAPTCHASECRET": {
       "usedBy": [
         {

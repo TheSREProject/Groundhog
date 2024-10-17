@@ -1,34 +1,26 @@
+// src/ProtectedRoute.js
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ element }) => {
   const [authenticated, setAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true); // Add loading state to delay rendering
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = () => {
-      const token = localStorage.getItem('accessToken'); // Fetch token from localStorage
-
-      if (token) {
-        setAuthenticated(true); // User is authenticated
-      } else {
-        setAuthenticated(false); // No token found, user is not authenticated
-      }
-      setLoading(false); // Token check is complete
+      const token = localStorage.getItem('accessToken');
+      setAuthenticated(!!token);
+      setLoading(false);
     };
 
     checkAuth();
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>; // Display loading while checking authentication
+    return <p>Loading...</p>;
   }
 
-  if (!authenticated) {
-    return <Navigate to="/login" />; // Redirect to login if user is not authenticated
-  }
-
-  return element;
+  return authenticated ? element : <Navigate to="/auth" />; // Redirect to /auth for login/register
 };
 
 export default ProtectedRoute;

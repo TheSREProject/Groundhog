@@ -20,7 +20,9 @@
       },
       "auth": {
         "groundhogAuth": {},
-        "groundhog481e6077": {}
+        "groundhog481e6077": {
+          "googleClientId": "699296230304-0hc813ingd5uvlvbfcv596nnf34b1o6d.apps.googleusercontent.com"
+        }
       },
       "function": {
         "groundhogAuthDefineAuthChallenge": {},
