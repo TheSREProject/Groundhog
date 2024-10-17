@@ -9,7 +9,7 @@ function Navbar() {
 
   const handleHostedUISignIn = () => {
     const clientId = awsExports.aws_user_pools_web_client_id;
-    const redirectUri = encodeURIComponent(awsExports.oauth.redirectSignIn.split(',')[0]); // Use the first redirect URL for production
+    const redirectUri = encodeURIComponent(awsExports.oauth.redirectSignIn.split(',')[1]); // Use the first redirect URL for production
     const scope = 'email+openid+profile+aws.cognito.signin.user.admin+phone';
 
     const hostedUiUrl = `https://${awsExports.oauth.domain}/login?response_type=code&client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}`;
