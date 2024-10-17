@@ -9,26 +9,21 @@ function Navbar() {
 
   const handleHostedUISignIn = () => {
     const clientId = awsExports.aws_user_pools_web_client_id;
-    encodeURIComponent(awsExports.oauth.redirectSignIn.split(',')[1]);
-    // Define the scope correctly
+    const redirectUri = encodeURIComponent(awsExports.oauth.redirectSignIn.split(',')[0]); // Use the first redirect URL for production
     const scope = 'email+openid+profile+aws.cognito.signin.user.admin+phone';
 
-    // Include the scope variable in the URL
     const hostedUiUrl = `https://${awsExports.oauth.domain}/login?response_type=code&client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}`;
 
-    // Redirect to the Hosted UI for sign-in
     window.location.href = hostedUiUrl;
   };
 
   const handleHostedUISignOut = () => {
     const clientId = awsExports.aws_user_pools_web_client_id;
-    const signOutUri = `https://${awsExports.oauth.domain}/logout?client_id=${clientId}&logout_uri=http://localhost:3000/`;
-    
-    // Clear tokens and global state
+    const signOutUri = `https://${awsExports.oauth.domain}/logout?client_id=${clientId}&logout_uri=${awsExports.oauth.redirectSignOut.split(',')[0]}`; // Use the first redirect URL for production
+
     localStorage.clear();
     logout();
 
-    // Redirect to the Cognito Hosted UI logout endpoint
     window.location.href = signOutUri;
   };
 
