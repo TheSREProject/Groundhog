@@ -15,6 +15,12 @@ function Account() {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState('');
 
+  // New state variable to control visibility of both forms
+  const [isFormVisible, setIsFormVisible] = useState(false);
+
+  const [newFirstName, setNewFirstName] = useState('');
+  const [newLastName, setNewLastName] = useState('');
+
   const client = useMemo(() => new CognitoIdentityProviderClient({ region: 'us-east-1' }), []);
 
   const fetchUserData = useCallback(async () => {
@@ -37,6 +43,8 @@ function Account() {
       setEmail(userAttributes.email);
       setFirstName(userAttributes.given_name);
       setLastName(userAttributes.family_name);
+      setNewFirstName(userAttributes.given_name);
+      setNewLastName(userAttributes.family_name);
 
       const identities = JSON.parse(userAttributes.identities || '[]');
       if (identities.length > 0) {
@@ -63,14 +71,15 @@ function Account() {
       const command = new UpdateUserAttributesCommand({
         AccessToken: accessToken,
         UserAttributes: [
-          { Name: 'given_name', Value: firstName },
-          { Name: 'family_name', Value: lastName },
+          { Name: 'given_name', Value: newFirstName },
+          { Name: 'family_name', Value: newLastName },
         ],
       });
 
       await client.send(command);
       setMessage('Name updated successfully');
-      fetchUserData();
+      setFirstName(newFirstName);
+      setLastName(newLastName);
     } catch (err) {
       console.error('Error updating user name:', err);
       setError('Failed to update user name.');
@@ -131,62 +140,71 @@ function Account() {
 
         {provider === 'Cognito' && (
           <>
-            <h2>Update Name</h2>
-            <form onSubmit={handleNameUpdate} className="account-form">
-              <div>
-                <label>New First Name:</label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-              </div>
-              <div>
-                <label>New Last Name:</label>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-              </div>
-              <div className="form-buttons">
-                <button type="submit" className="save-button">Update Name</button>
-              </div>
-            </form>
+            {/* Single button to toggle the visibility of the whole form */}
+            <button onClick={() => setIsFormVisible(!isFormVisible)} className="toggle-button">
+              {isFormVisible ? 'Hide Update Form' : 'Update Name and Password'}
+            </button>
 
-            <h2>Change Password</h2>
-            <form onSubmit={handlePasswordChange} className="account-form">
-              <div>
-                <label>Current Password:</label>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                />
-              </div>
-              <div>
-                <label>New Password:</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={handleNewPasswordChange}
-                />
-                <div className="password-strength-bar">
-                  <div className={`strength-${passwordStrength}`}></div>
-                </div>
-              </div>
-              <div>
-                <label>Repeat New Password:</label>
-                <input
-                  type="password"
-                  value={repeatNewPassword}
-                  onChange={(e) => setRepeatNewPassword(e.target.value)}
-                />
-              </div>
-              <div className="form-buttons">
-                <button type="submit" className="save-button">Change Password</button>
-              </div>
-            </form>
+            {isFormVisible && (
+              <>
+                <h2>Update Name</h2>
+                <form onSubmit={handleNameUpdate} className="account-form">
+                  <div>
+                    <label>New First Name:</label>
+                    <input
+                      type="text"
+                      value={newFirstName}
+                      onChange={(e) => setNewFirstName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label>New Last Name:</label>
+                    <input
+                      type="text"
+                      value={newLastName}
+                      onChange={(e) => setNewLastName(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-buttons">
+                    <button type="submit" className="save-button">Update Name</button>
+                  </div>
+                </form>
+
+                <h2>Change Password</h2>
+                <form onSubmit={handlePasswordChange} className="account-form">
+                  <div>
+                    <label>Current Password:</label>
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label>New Password:</label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={handleNewPasswordChange}
+                    />
+                    <div className="password-strength-bar">
+                      <div className={`strength-${passwordStrength}`}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <label>Repeat New Password:</label>
+                    <input
+                      type="password"
+                      value={repeatNewPassword}
+                      onChange={(e) => setRepeatNewPassword(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-buttons">
+                    <button type="submit" className="save-button">Change Password</button>
+                  </div>
+                </form>
+              </>
+            )}
           </>
         )}
 
