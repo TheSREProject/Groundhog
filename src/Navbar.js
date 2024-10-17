@@ -9,7 +9,7 @@ function Navbar() {
 
   const handleHostedUISignIn = () => {
     const clientId = awsExports.aws_user_pools_web_client_id;
-    const redirectUri = encodeURIComponent('http://localhost:3000/');
+    encodeURIComponent(awsExports.oauth.redirectSignIn.split(',')[1]);
     // Define the scope correctly
     const scope = 'email+openid+profile+aws.cognito.signin.user.admin+phone';
 
