@@ -58,7 +58,7 @@
       "profile"
     ],
     "userpoolClientLambdaRole": "ground481e6077_userpoolclient_lambda_role",
-    "userpoolClientSetAttributes": true,
+    "userpoolClientSetAttributes": false,
     "sharedId": "481e6077",
     "resourceName": "groundhog481e6077",
     "authSelections": "identityPoolAndUserPool",
@@ -93,14 +93,16 @@
     "userPoolGroups": false,
     "adminQueries": false,
     "authProviders": [
-      "accounts.google.com"
+      "accounts.google.com",
+      "www.amazon.com"
     ],
     "thirdPartyAuth": true,
     "hostedUIDomainName": "groundhog",
     "authProvidersUserPool": [
-      "Google"
+      "Google",
+      "LoginWithAmazon"
     ],
-    "hostedUIProviderMeta": "[{\"ProviderName\":\"Google\",\"authorize_scopes\":\"openid email profile\",\"AttributeMapping\":{\"email\":\"email\",\"username\":\"sub\"}}]",
+    "hostedUIProviderMeta": "[{\"ProviderName\":\"Google\",\"authorize_scopes\":\"openid email profile\",\"AttributeMapping\":{\"email\":\"email\",\"username\":\"sub\"}},{\"ProviderName\":\"LoginWithAmazon\",\"authorize_scopes\":\"profile profile:user_id\",\"AttributeMapping\":{\"email\":\"email\",\"username\":\"user_id\"}}]",
     "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"http://localhost:3000/\",\"https://main.d3gg5a4ch59doa.amplifyapp.com/\"],\"LogoutURLs\":[\"http://localhost:3000/\",\"https://main.d3gg5a4ch59doa.amplifyapp.com/\"]}"
   }
 }

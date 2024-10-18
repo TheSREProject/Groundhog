@@ -32,7 +32,8 @@
           "EMAIL"
         ],
         "socialProviders": [
-          "GOOGLE"
+          "GOOGLE",
+          "AMAZON"
         ],
         "usernameAttributes": [
           "EMAIL"
@@ -59,6 +60,14 @@
     }
   },
   "parameters": {
+    "AMPLIFY_auth_groundhog481e6077_amazonAppId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "groundhog481e6077"
+        }
+      ]
+    },
     "AMPLIFY_auth_groundhog481e6077_googleClientId": {
       "usedBy": [
         {

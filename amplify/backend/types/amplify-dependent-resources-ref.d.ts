@@ -8,6 +8,7 @@ export type AmplifyDependentResourcesAttributes = {
   },
   "auth": {
     "groundhog481e6077": {
+      "AmazonWebClient": "string",
       "AppClientID": "string",
       "AppClientIDWeb": "string",
       "GoogleWebClient": "string",

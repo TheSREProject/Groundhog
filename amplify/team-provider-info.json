@@ -21,7 +21,8 @@
       "auth": {
         "groundhogAuth": {},
         "groundhog481e6077": {
-          "googleClientId": "699296230304-0hc813ingd5uvlvbfcv596nnf34b1o6d.apps.googleusercontent.com"
+          "googleClientId": "699296230304-0hc813ingd5uvlvbfcv596nnf34b1o6d.apps.googleusercontent.com",
+          "amazonAppId": "amzn1.application-oa2-client.192bafb979ec4274ab45eb8be9cd4c66"
         }
       },
       "function": {
