@@ -1,0 +1,81 @@
+/* Container for the add user form */
+.add-user-form-container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  /* Label styling */
+  .add-user-form-container label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+  }
+  
+  /* Input field styling */
+  .add-user-form-container input[type="email"],
+  .add-user-form-container select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  
+  /* Dropdown styling */
+  .add-user-form-container select {
+    background-color: #fff;
+    appearance: none; /* Removes default browser arrow for select */
+    padding-right: 30px; /* Space for custom dropdown arrow */
+  }
+  
+  /* Button styling */
+  .add-user-form-container .submit-user-button,
+  .add-user-form-container .cancel-user-button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  /* Submit button styling */
+  .add-user-form-container .submit-user-button {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  /* Cancel button styling */
+  .add-user-form-container .cancel-user-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  /* Button hover effect */
+  .add-user-form-container .submit-user-button:hover,
+  .add-user-form-container .cancel-user-button:hover {
+    opacity: 0.9;
+  }
+  
+  /* Align buttons horizontally */
+  .add-user-form-container .form-buttons {
+    display: flex;
+    justify-content: flex-start;
+  }
+  
+  /* Error message styling */
+  .add-user-form-container .error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  

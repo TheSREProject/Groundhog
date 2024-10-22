@@ -1,0 +1,84 @@
+/* General container styling */
+.create-organization-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f7f9fc;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  /* Title styling */
+  .create-organization-container h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  /* Form element styling */
+  .create-organization-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* Input fields */
+  .create-organization-container input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  .create-organization-container label {
+    text-align: left;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  /* Submit button styling */
+  .create-organization-container button {
+    padding: 10px 15px;
+    font-size: 1rem;
+    color: white;
+    background-color: #4caf50;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .create-organization-container button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Success message styling */
+  .create-organization-container p {
+    margin-top: 20px;
+    font-size: 1.1rem;
+    color: #4caf50;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .create-organization-container {
+      padding: 15px;
+    }
+  
+    .create-organization-container h1 {
+      font-size: 1.5rem;
+    }
+  
+    .create-organization-container input[type="text"] {
+      font-size: 0.9rem;
+      padding: 8px;
+    }
+  
+    .create-organization-container button {
+      font-size: 0.9rem;
+      padding: 8px 12px;
+    }
+  }
+  

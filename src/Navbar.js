@@ -9,7 +9,7 @@ function Navbar() {
 
   const handleHostedUISignIn = () => {
     const clientId = awsExports.aws_user_pools_web_client_id;
-    const redirectUri = encodeURIComponent(awsExports.oauth.redirectSignIn.split(',')[1]); // Use the [1] redirect URL for production
+    const redirectUri = encodeURIComponent(awsExports.oauth.redirectSignIn.split(',')[0]); // Use the [1] redirect URL for production
     const scope = 'email+openid+profile+aws.cognito.signin.user.admin+phone';
 
     const hostedUiUrl = `https://${awsExports.oauth.domain}/login?response_type=code&client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}`;
@@ -19,7 +19,7 @@ function Navbar() {
 
   const handleHostedUISignOut = () => {
     const clientId = awsExports.aws_user_pools_web_client_id;
-    const signOutUri = `https://${awsExports.oauth.domain}/logout?client_id=${clientId}&logout_uri=${awsExports.oauth.redirectSignOut.split(',')[1]}`; // Use the [1] redirect URL for production
+    const signOutUri = `https://${awsExports.oauth.domain}/logout?client_id=${clientId}&logout_uri=${awsExports.oauth.redirectSignOut.split(',')[0]}`; // Use the [1] redirect URL for production
 
     localStorage.clear();
     logout();

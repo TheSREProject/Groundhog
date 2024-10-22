@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import { Amplify } from 'aws-amplify';
@@ -6,6 +7,7 @@ import Navbar from './Navbar';
 import Home from './Home';
 import Account from './Account';
 import Contact from './Contact';
+import CreateOrganization from './CreateOrganization'; // Import the CreateOrganization component
 import HostedUICallback from './HostedUICallback'; 
 import { AuthProvider } from './AuthContext'; 
 import './App.css';
@@ -38,6 +40,7 @@ function App() {
               <Route path="/" element={<RootRedirect />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/account" element={<Account />} />
+              <Route path="/organization" element={<CreateOrganization />} /> {/* New Route */}
               <Route path="/auth/callback" element={<HostedUICallback />} />
             </Routes>
           </main>
