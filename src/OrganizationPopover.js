@@ -8,6 +8,11 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
   const [isAddingUser, setIsAddingUser] = useState(false); // Show add user form
   const [organizationUsers, setOrganizationUsers] = useState([]); // State for storing organization users
   const [loadingUsers, setLoadingUsers] = useState(true); // Track loading state for users
+  const [isEditingUsers, setIsEditingUsers] = useState(false); // Track user role editing state
+  const [updatedRoles, setUpdatedRoles] = useState({}); // Track updated roles for users
+
+  // Get cognito_user_id from localStorage
+  const cognitoUserId = localStorage.getItem('cognito_user_id');
 
   // Synchronize newDescription with the passed organization description when the component is updated
   useEffect(() => {
@@ -90,6 +95,55 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
     setIsEditing(false); // Exit editing mode
   };
 
+  // Handle role changes
+  const handleRoleChange = (userId, newRole) => {
+    setUpdatedRoles({
+      ...updatedRoles,
+      [userId]: newRole,
+    });
+  };
+
+  // Submit updated roles
+  const handleSubmitRoles = async () => {
+    const apiUrl = 'https://7euu9aq3j0.execute-api.us-east-1.amazonaws.com/dev/'; // Update with your endpoint
+
+    try {
+      for (const userId in updatedRoles) {
+        const user = organizationUsers.find((u) => u.user_id === parseInt(userId));
+        if (!user) continue;
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            organization_name: organization.organization_name,
+            cognito_user_id: cognitoUserId, // Now using cognito_user_id from localStorage
+            email: user.email,
+            role_name: updatedRoles[userId], // New role for the user
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update user roles');
+        }
+      }
+
+      setMessage('User roles updated successfully.');
+      setIsEditingUsers(false);
+      fetchOrganizationUsers(); // Refresh users after update
+    } catch (err) {
+      setMessage('Failed to update user roles.');
+    }
+  };
+
+  // Cancel role changes
+  const handleCancelEditRoles = () => {
+    setIsEditingUsers(false);
+    setUpdatedRoles({});
+  };
+
   return (
     <div className="popover">
       <div className="popover-content">
@@ -125,7 +179,17 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
           <ul className="no-bullets">
             {organizationUsers.map((user) => (
               <li key={user.cognito_user_id}>
-                {user.email} - {user.role_name}
+                {user.email} - {isEditingUsers ? (
+                  <select
+                    value={updatedRoles[user.user_id] || user.role_name}
+                    onChange={(e) => handleRoleChange(user.user_id, e.target.value)}
+                  >
+                    <option value="Administrator">Administrator</option>
+                    <option value="User">User</option>
+                  </select>
+                ) : (
+                  user.role_name
+                )}
               </li>
             ))}
           </ul>
@@ -149,6 +213,21 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
                 fetchOrganizationUsers={fetchOrganizationUsers}
                 onCancel={() => setIsAddingUser(false)}  // Pass the cancel function
               />
+            )}
+
+            {!isEditingUsers ? (
+              <button onClick={() => setIsEditingUsers(true)} className="edit-user-roles-button">
+                Edit User Roles
+              </button>
+            ) : (
+              <>
+                <button onClick={handleSubmitRoles} className="submit-roles-button">
+                  Submit
+                </button>
+                <button onClick={handleCancelEditRoles} className="cancel-roles-button">
+                  Cancel
+                </button>
+              </>
             )}
           </>
         )}
