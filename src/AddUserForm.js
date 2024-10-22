@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import './AddUserForm.css'; // Import the CSS file
 
-function AddUserForm({ organization, setMessage, onCancel }) {
+function AddUserForm({ organization, setMessage, fetchOrganizationUsers, onCancel }) { // Add fetchOrganizationUsers prop
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('User');
   const [error, setError] = useState(null);
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-    const apiUrl = 'https://p0qzdvvj17.execute-api.us-east-1.amazonaws.com/dev/';
+    const apiUrl = 'https://1zvdmv1qbj.execute-api.us-east-1.amazonaws.com/dev/'; // Ensure this is the correct URL
     
     const data = {
       email,
@@ -32,6 +32,10 @@ function AddUserForm({ organization, setMessage, onCancel }) {
       setMessage('User added successfully.');
       setEmail('');
       setRole('User');
+      
+      // Fire the fetchOrganizationUsers to refresh the user list after adding a user
+      await fetchOrganizationUsers();
+      
       onCancel(); // Close the form after adding user
     } catch (err) {
       setError('Failed to add user. Please try again.');
