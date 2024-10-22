@@ -25,7 +25,7 @@ const HostedUICallback = () => {
                 grant_type: 'authorization_code',
                 client_id: awsExports.aws_user_pools_web_client_id,
                 code,
-                redirect_uri: awsExports.oauth.redirectSignIn.split(',')[0], // Use the [1] redirect URL for production
+                redirect_uri: awsExports.oauth.redirectSignIn.split(',')[1], // Use the [1] redirect URL for production
               }),
             }
           );
