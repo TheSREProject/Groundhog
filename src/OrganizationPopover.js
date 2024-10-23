@@ -23,7 +23,7 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
 
   // Fetch users belonging to the organization
   const fetchOrganizationUsers = useCallback(async () => {
-    const apiUrl = `https://p0qzdvvj17.execute-api.us-east-1.amazonaws.com/dev/?organization_name=${organization.organization_name}`;
+    const apiUrl = `https://p0qzdvvj17.execute-api.us-east-1.amazonaws.com/dev/?organization_name=${organization.organization_name}&cognito_user_id=${cognitoUserId}`;
 
     try {
       const response = await fetch(apiUrl, {
