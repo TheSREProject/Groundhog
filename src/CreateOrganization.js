@@ -58,7 +58,10 @@ function CreateOrganization() {
       }
 
       const result = await createResponse.json();
-      setMessage(`Organization "${result.organization.name}" created successfully!`);
+      console.log("API Response:", result); // Log the full API response for debugging
+
+      // Update message to reflect the organization name correctly
+      setMessage(`Organization "${result.data.organization_name}" created successfully!`);
 
       // After successfully creating the organization, fetch the updated list of organizations
       await fetchOrganizations(cognitoUserId);

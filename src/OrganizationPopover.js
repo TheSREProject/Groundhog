@@ -10,8 +10,10 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
   const [loadingUsers, setLoadingUsers] = useState(true); // Track loading state for users
   const [isEditingUsers, setIsEditingUsers] = useState(false); // Track user role editing state
   const [updatedRoles, setUpdatedRoles] = useState({}); // Track updated roles for users
+  const [currentOwnerId, setCurrentOwnerId] = useState(null); // Track current organization owner
+  const [isOriginalOwner, setIsOriginalOwner] = useState(false); // Track if logged-in user is/was the original owner
 
-  // Get cognito_user_id from localStorage
+  // Get cognito_user_id from localStorage (logged-in user's ID)
   const cognitoUserId = localStorage.getItem('cognito_user_id');
 
   // Synchronize newDescription with the passed organization description when the component is updated
@@ -35,6 +37,15 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
         const data = await response.json();
         setOrganizationUsers(data.users || []); // Set users array
         setLoadingUsers(false);
+
+        // Find the current owner
+        const owner = data.users.find(user => user.role_name === 'Organization_Owner');
+        if (owner) {
+          setCurrentOwnerId(owner.user_id);
+          if (owner.cognito_user_id === cognitoUserId) {
+            setIsOriginalOwner(true); // The logged-in user is the original owner
+          }
+        }
       } else {
         setMessage('Failed to load users.');
         setLoadingUsers(false);
@@ -44,7 +55,7 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
       setMessage('An error occurred while fetching users.');
       setLoadingUsers(false);
     }
-  }, [organization.organization_name, setMessage]);
+  }, [organization.organization_name, setMessage, cognitoUserId]);
 
   // Fetch users when the popover is opened
   useEffect(() => {
@@ -128,6 +139,11 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
         if (!response.ok) {
           throw new Error('Failed to update user roles');
         }
+
+        // If a new owner is selected, set the currentOwnerId
+        if (updatedRoles[userId] === 'Organization_Owner') {
+          setCurrentOwnerId(parseInt(userId));
+        }
       }
 
       setMessage('User roles updated successfully.');
@@ -186,6 +202,15 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
                   >
                     <option value="Administrator">Administrator</option>
                     <option value="User">User</option>
+                    {/* Only allow one user to be Organization_Owner */}
+                    <option 
+                      value="Organization_Owner" 
+                      disabled={
+                        currentOwnerId && currentOwnerId !== user.user_id && !isOriginalOwner
+                      }
+                    >
+                      Organization_Owner
+                    </option>
                   </select>
                 ) : (
                   user.role_name
@@ -197,7 +222,7 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
           <p>No users found for this organization.</p>
         )}
 
-        {organization.role_name === 'Organization_Owner' && (
+        {isOriginalOwner && (
           <>
             <button onClick={() => setIsEditing(true)} className="edit-button">
               Edit Description

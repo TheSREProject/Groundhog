@@ -13,6 +13,39 @@ export const AuthProvider = ({ children }) => {
   // Use the custom hook for managing the access token and refreshing it
   const { accessToken, refreshAccessToken } = useAuth();
 
+  // Function to add the user to the database via API Gateway
+  const addUserToDatabase = async (name, email, cognito_user_id) => {
+    const apiUrl = 'https://4txa8358m9.execute-api.us-east-1.amazonaws.com/dev/';
+    const payload = {
+      name,
+      email,
+      cognito_user_id,
+    };
+
+    try {
+      console.log('Sending API request to add user:', payload);
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to add user to the database. Status: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('User successfully added to the database:', result);
+
+      // Set the 'userAdded' flag in localStorage
+      localStorage.setItem('userAdded', 'true');
+    } catch (error) {
+      console.error('Error adding user to the database:', error);
+    }
+  };
+
   // Function to fetch user data from Cognito and update the authenticated state
   const fetchUserData = useCallback(async (token) => {
     try {
@@ -29,6 +62,22 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('name', userAttributes.name);
       localStorage.setItem('email', userAttributes.email);
       localStorage.setItem('cognito_user_id', userAttributes.sub);
+
+      console.log('User data stored in localStorage:', {
+        name: userAttributes.name,
+        email: userAttributes.email,
+        cognito_user_id: userAttributes.sub,
+      });
+
+      // Check if the API call to add the user was already made
+      const userAddedFlag = localStorage.getItem('userAdded');
+
+      if (!userAddedFlag) {
+        console.log('No previous API call found. Adding user...');
+        await addUserToDatabase(userAttributes.name, userAttributes.email, userAttributes.sub);
+      } else {
+        console.log('User already added. Skipping API call.');
+      }
 
       setAuthenticated(true); // Set authenticated to true
     } catch (err) {
@@ -74,6 +123,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('name');
     localStorage.removeItem('email');
     localStorage.removeItem('cognito_user_id');
+    localStorage.removeItem('userAdded'); // Clear the user added flag
 
     setAuthenticated(false); // Immediately set authenticated state to false
   };
