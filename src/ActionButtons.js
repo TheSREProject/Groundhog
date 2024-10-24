@@ -7,14 +7,12 @@ function ActionButtons({
   isEditingUsers,
   setIsEditingUsers,
   handleSubmitRoles,
-  handleCancelEditRoles
+  handleCancelEditRoles,
 }) {
   return (
     <>
       {isOriginalOwner && (
-        <>
-          {/* Remove the Edit Description button here */}
-
+        <div className="action-buttons-container">
           {/* Add User Button */}
           {!isAddingUser ? (
             <button onClick={() => setIsAddingUser(true)} className="add-user-button">
@@ -41,7 +39,7 @@ function ActionButtons({
               </button>
             </>
           )}
-        </>
+        </div>
       )}
     </>
   );

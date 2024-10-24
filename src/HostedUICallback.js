@@ -2,9 +2,10 @@ import React, { useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
 import awsExports from './aws-exports';
+import Cookies from 'js-cookie';
 
 const HostedUICallback = () => {
-  const { login } = useContext(AuthContext);
+  const { setAuthenticated } = useContext(AuthContext); // Use setAuthenticated directly
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +26,7 @@ const HostedUICallback = () => {
                 grant_type: 'authorization_code',
                 client_id: awsExports.aws_user_pools_web_client_id,
                 code,
-                redirect_uri: awsExports.oauth.redirectSignIn.split(',')[1], // Use the [1] redirect URL for production
+                redirect_uri: awsExports.oauth.redirectSignIn.split(',')[1],
               }),
             }
           );
@@ -36,12 +37,13 @@ const HostedUICallback = () => {
 
           const tokens = await response.json();
 
-          localStorage.setItem('idToken', tokens.id_token);
-          localStorage.setItem('accessToken', tokens.access_token);
-          localStorage.setItem('refreshToken', tokens.refresh_token);
+          // Store tokens in cookies
+          Cookies.set('accessToken', tokens.access_token, { secure: true, sameSite: 'Strict' });
+          Cookies.set('refreshToken', tokens.refresh_token, { secure: true, sameSite: 'Strict' });
+          Cookies.set('idToken', tokens.id_token, { secure: true, sameSite: 'Strict' });
 
-          login();
-          navigate('/');
+          setAuthenticated(true); // Set authenticated to true immediately after storing tokens
+          navigate('/'); // Redirect after authentication
         } catch (error) {
           console.error('Error exchanging code for tokens:', error);
         }
@@ -49,7 +51,7 @@ const HostedUICallback = () => {
     };
 
     fetchTokens();
-  }, [login, navigate]);
+  }, [setAuthenticated, navigate]);
 
   return <div>Processing authentication...</div>;
 };

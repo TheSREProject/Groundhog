@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import './AddUserForm.css'; // Import the CSS file
+import './AddUserForm.css'; // Ensure correct styling
 
-function AddUserForm({ organization, setMessage, fetchOrganizationUsers, onCancel }) { // Add fetchOrganizationUsers prop
+function AddUserForm({ organization, setMessage, fetchOrganizationUsers, onCancel }) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('User');
   const [error, setError] = useState(null);
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-    const apiUrl = 'https://1zvdmv1qbj.execute-api.us-east-1.amazonaws.com/dev/'; // Ensure this is the correct URL
+    const apiUrl = 'https://1zvdmv1qbj.execute-api.us-east-1.amazonaws.com/dev/'; // Ensure this is correct
     
     const data = {
       email,
@@ -33,10 +33,10 @@ function AddUserForm({ organization, setMessage, fetchOrganizationUsers, onCance
       setEmail('');
       setRole('User');
       
-      // Fire the fetchOrganizationUsers to refresh the user list after adding a user
+      // Refresh organization users after adding a new user
       await fetchOrganizationUsers();
       
-      onCancel(); // Close the form after adding user
+      onCancel(); // Close the form after adding a user
     } catch (err) {
       setError('Failed to add user. Please try again.');
     }
@@ -74,7 +74,7 @@ function AddUserForm({ organization, setMessage, fetchOrganizationUsers, onCance
           <button
             type="button"
             className="cancel-user-button"
-            onClick={onCancel}
+            onClick={onCancel} // Close the form on cancel
           >
             Cancel
           </button>

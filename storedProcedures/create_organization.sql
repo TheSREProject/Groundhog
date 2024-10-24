@@ -12,14 +12,8 @@ DECLARE
     usr_id INTEGER;
 BEGIN
     -- Check if the caller has the required permission
-    IF NOT EXISTS (
-        SELECT 1
-        FROM roles r
-        JOIN permissions p ON p.permission_id = ANY (r.permission_id)
-        WHERE r.role_name = v_caller_role_name
-        AND p.permission_name = 'create_organization'
-    ) THEN
-        RAISE EXCEPTION 'Permission denied: Missing create_organization permission for role %', v_caller_role_name;
+    IF NOT check_user_permission(v_cognito_user_id, 'create_organization', v_caller_role_name) THEN
+        RAISE EXCEPTION 'Permission denied: Missing create_organization permission for user % or role %', v_cognito_user_id, v_caller_role_name;
     END IF;
 
     -- Check if the organization already exists

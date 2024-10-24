@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { CognitoIdentityProviderClient, GetUserCommand } from '@aws-sdk/client-cognito-identity-provider';
-import OrganizationPopover from './OrganizationPopover'; // Import OrganizationPopover only
+import OrganizationModal from './OrganizationModal';
+import Cookies from 'js-cookie';
 import './Account.css';
 
 function Account() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [userId, setUserId] = useState('');
-  const [organizations, setOrganizations] = useState([]); // Holds fetched organizations
-  const [popoverOrg, setPopoverOrg] = useState(null); // State to manage pop-over visibility
-  const [message, setMessage] = useState(''); // Holds success/error messages
-  const [loading, setLoading] = useState(true); // Track loading state
+  const [organizations, setOrganizations] = useState([]); 
+  const [popoverOrg, setPopoverOrg] = useState(null);
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(true);
 
   // Fetch user data from Cognito
   useEffect(() => {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        const accessToken = localStorage.getItem('accessToken');
+        const accessToken = Cookies.get('accessToken'); // Use Cookies instead of localStorage
         if (!accessToken) {
           console.error('Access token not found.');
           setLoading(false);
@@ -35,7 +36,7 @@ function Account() {
 
         setEmail(userAttributes.email);
         setName(userAttributes.name);
-        setUserId(userAttributes.sub);
+        setUserId(userAttributes.sub);  // Store cognito_user_id here
       } catch (err) {
         console.error('Error fetching user data:', err);
       } finally {
@@ -46,22 +47,42 @@ function Account() {
     fetchUserData();
   }, []);
 
-  // Fetch organizations from localStorage
+  // Fetch organizations from the backend once userId is available
   useEffect(() => {
-    const storedOrganizations = localStorage.getItem('organizations');
-    if (storedOrganizations) {
-      setOrganizations(JSON.parse(storedOrganizations)); // Parse JSON string from local storage
-    }
-  }, []);
+    const fetchOrganizations = async () => {
+      if (!userId) {
+        console.error('User ID is missing. Cannot fetch organizations.');
+        return;
+      }
 
-  // Function to handle organization click and display popover
+      try {
+        const apiUrl = `https://fbodckimai.execute-api.us-east-1.amazonaws.com/dev/?cognito_user_id=${userId}`;
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch organizations');
+        }
+
+        const result = await response.json();
+        setOrganizations(result.organizations || []); // Update state with organizations
+        Cookies.set('organizations', JSON.stringify(result.organizations), { secure: true, sameSite: 'Strict' });
+      } catch (err) {
+        console.error('Error fetching organizations:', err);
+      }
+    };
+
+    // Fetch organizations if userId is available
+    if (userId) {
+      fetchOrganizations();
+    }
+  }, [userId]);
+
   const handleOrgClick = (org) => {
     setPopoverOrg(org);
-    setMessage(''); // Clear any previous messages
+    setMessage('');
   };
 
-  // Close the popover
-  const closePopover = () => {
+  const closeModal = () => {
     setPopoverOrg(null);
   };
 
@@ -79,36 +100,25 @@ function Account() {
           </div>
         )}
 
-        {/* Organization Information Table */}
         {organizations.length > 0 && (
-          <div className="organization-table-container">
+          <div className="organization-list-container">
             <h2>Your Organizations</h2>
-            <table className="organization-table">
-              <thead>
-                <tr>
-                  <th>Organization Name</th>
-                </tr>
-              </thead>
-              <tbody>
-                {organizations.map((org, index) => (
-                  <tr key={index}>
-                    <td>
-                      <button onClick={() => handleOrgClick(org)} className="org-link">
-                        {org.organization_name}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ul className="organization-links">
+              {organizations.map((org, index) => (
+                <li key={index}>
+                  <button onClick={() => handleOrgClick(org)} className="org-link">
+                    {org.organization_name}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
-        {/* Popover for Organization Details */}
         {popoverOrg && (
-          <OrganizationPopover 
+          <OrganizationModal 
             organization={popoverOrg} 
-            closePopover={closePopover} 
+            closeModal={closeModal}
             setMessage={setMessage} 
             userId={userId} 
             organizations={organizations} 

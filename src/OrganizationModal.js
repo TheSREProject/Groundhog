@@ -1,17 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import './OrganizationPopover.css';
+import './OrganizationModal.css';
 import OrganizationUserList from './OrganizationUserList';
 import ActionButtons from './ActionButtons';
 import DescriptionEditor from './DescriptionEditor';
-import AddUserForm from './AddUserForm'; // Import AddUserForm
+import AddUserForm from './AddUserForm';
 
-function OrganizationPopover({ organization, closePopover, setMessage, userId, organizations, setOrganizations }) {
-  const [isAddingUser, setIsAddingUser] = useState(false);
+function OrganizationModal({
+  organization,
+  closeModal,
+  setMessage,
+  userId,
+  organizations,
+  setOrganizations
+}) {
+  const [isAddingUser, setIsAddingUser] = useState(false); // Control AddUserForm visibility
+  const [isEditingUsers, setIsEditingUsers] = useState(false); // Control Edit User Role visibility
   const [organizationUsers, setOrganizationUsers] = useState([]);
-  const [isEditingUsers, setIsEditingUsers] = useState(false);
   const [updatedRoles, setUpdatedRoles] = useState({});
   const [currentOwnerId, setCurrentOwnerId] = useState(null);
-  const [isOriginalOwner, setIsOriginalOwner] = useState(false);
+  const [isOriginalOwner, setIsOriginalOwner] = useState(false); // Check if user is original owner
+  const [userRole, setUserRole] = useState('User'); // Store the logged-in user's role
 
   const cognitoUserId = localStorage.getItem('cognito_user_id');
 
@@ -34,9 +42,16 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
         if (owner) {
           setCurrentOwnerId(owner.user_id);
           if (owner.cognito_user_id === cognitoUserId) {
-            setIsOriginalOwner(true);
+            setIsOriginalOwner(true); // Set original owner status
           }
         }
+
+        // Find the logged-in user's role in this organization
+        const loggedInUser = data.users.find((user) => user.cognito_user_id === cognitoUserId);
+        if (loggedInUser) {
+          setUserRole(loggedInUser.role_name); // Set the user's role
+        }
+
       } else if (response.status === 403) {
         setOrganizationUsers([]);
       } else {
@@ -103,18 +118,20 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
   };
 
   return (
-    <div className="popover">
-      <div className="popover-content">
+    <div className="modal">
+      <div className="modal-content">
         <h3>{organization.organization_name}</h3>
 
-        {/* DescriptionEditor handles description changes */}
-        <DescriptionEditor
-          organization={organization}
-          setMessage={setMessage}
-          userId={userId}
-          organizations={organizations}
-          setOrganizations={setOrganizations}
-        />
+        {/* Only allow the owner or admin to edit description */}
+        {(userRole === 'Organization_Owner' || userRole === 'Administrator') && (
+          <DescriptionEditor
+            organization={organization}
+            setMessage={setMessage}
+            userId={userId}
+            organizations={organizations}
+            setOrganizations={setOrganizations}
+          />
+        )}
 
         {/* Organization User List */}
         <OrganizationUserList
@@ -126,30 +143,32 @@ function OrganizationPopover({ organization, closePopover, setMessage, userId, o
           isOriginalOwner={isOriginalOwner}
         />
 
-        {/* Conditionally render the AddUserForm when isAddingUser is true */}
+        {/* Render AddUserForm when isAddingUser is true */}
         {isAddingUser ? (
           <AddUserForm
             organization={organization}
             setMessage={setMessage}
-            fetchOrganizationUsers={fetchOrganizationUsers} // Pass fetchOrganizationUsers prop to refresh user list
-            onCancel={() => setIsAddingUser(false)} // Pass onCancel prop to close the form
+            fetchOrganizationUsers={fetchOrganizationUsers} // Refresh users after adding
+            onCancel={() => setIsAddingUser(false)} // Close the form on cancel
           />
         ) : (
           <ActionButtons
             isOriginalOwner={isOriginalOwner}
             isAddingUser={isAddingUser}
-            setIsAddingUser={setIsAddingUser}
+            setIsAddingUser={setIsAddingUser} // Show the AddUserForm when clicked
             isEditingUsers={isEditingUsers}
-            setIsEditingUsers={setIsEditingUsers}
-            handleSubmitRoles={handleSubmitRoles}
-            handleCancelEditRoles={handleCancelEditRoles}
+            setIsEditingUsers={setIsEditingUsers} // Show the role editor when clicked
+            handleSubmitRoles={handleSubmitRoles} // Handle role submission
+            handleCancelEditRoles={handleCancelEditRoles} // Handle canceling role editing
           />
         )}
 
-        <button onClick={closePopover} className="close-button">Close</button>
+        <button onClick={closeModal} className="close-button">
+          Close
+        </button>
       </div>
     </div>
   );
 }
 
-export default OrganizationPopover;
+export default OrganizationModal;

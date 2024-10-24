@@ -1,6 +1,6 @@
-// src/ProtectedRoute.js
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import Cookies from 'js-cookie'; // Import Cookies
 
 const ProtectedRoute = ({ element }) => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -8,7 +8,7 @@ const ProtectedRoute = ({ element }) => {
 
   useEffect(() => {
     const checkAuth = () => {
-      const token = localStorage.getItem('accessToken');
+      const token = Cookies.get('accessToken'); // Check Cookies instead of localStorage
       setAuthenticated(!!token);
       setLoading(false);
     };

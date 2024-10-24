@@ -11,6 +11,7 @@ import CreateOrganization from './CreateOrganization'; // Import the CreateOrgan
 import HostedUICallback from './HostedUICallback'; 
 import { AuthProvider } from './AuthContext'; 
 import './App.css';
+import ErrorBoundary from './ErrorBoundary'; // Import ErrorBoundary
 
 Amplify.configure(awsExports);
 
@@ -32,20 +33,22 @@ function RootRedirect() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="app-container">
-          <Navbar />
-          <main>
-            <Routes>
-              <Route path="/" element={<RootRedirect />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/account" element={<Account />} />
-              <Route path="/organization" element={<CreateOrganization />} /> {/* New Route */}
-              <Route path="/auth/callback" element={<HostedUICallback />} />
-            </Routes>
-          </main>
-        </div>
-      </Router>
+      <ErrorBoundary> {/* Wrap the whole app in ErrorBoundary */}
+        <Router>
+          <div className="app-container">
+            <Navbar />
+            <main>
+              <Routes>
+                <Route path="/" element={<RootRedirect />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/account" element={<Account />} />
+                <Route path="/organization" element={<CreateOrganization />} />
+                <Route path="/auth/callback" element={<HostedUICallback />} />
+              </Routes>
+            </main>
+          </div>
+        </Router>
+      </ErrorBoundary>
     </AuthProvider>
   );
 }

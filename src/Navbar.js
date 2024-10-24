@@ -1,29 +1,35 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
+import { useLogout } from './hooks/useLogout';
+import Cookies from 'js-cookie';
 import awsExports from './aws-exports';
 import './Navbar.css';
 
 function Navbar() {
-  const { authenticated, logout } = useContext(AuthContext);
+  const { authenticated } = useContext(AuthContext); // No need to import setAuthenticated anymore
+  const { logout } = useLogout();
+  const [isAuthenticated, setIsAuthenticated] = useState(authenticated);
+
+  // Update local state when authenticated changes
+  useEffect(() => {
+    const token = Cookies.get('accessToken');
+    setIsAuthenticated(!!token);
+  }, [authenticated]);
 
   const handleHostedUISignIn = () => {
     const clientId = awsExports.aws_user_pools_web_client_id;
-    const redirectUri = encodeURIComponent(awsExports.oauth.redirectSignIn.split(',')[1]); // Use the [1] redirect URL for production
+    const redirectUri = encodeURIComponent(awsExports.oauth.redirectSignIn.split(',')[1]);
     const scope = 'email+openid+profile+aws.cognito.signin.user.admin+phone';
 
-    const hostedUiUrl = `https://${awsExports.oauth.domain}/login?response_type=code&client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}`;
-
-    window.location.href = hostedUiUrl;
+    window.location.href = `https://${awsExports.oauth.domain}/login?response_type=code&client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}`;
   };
 
   const handleHostedUISignOut = () => {
     const clientId = awsExports.aws_user_pools_web_client_id;
-    const signOutUri = `https://${awsExports.oauth.domain}/logout?client_id=${clientId}&logout_uri=${awsExports.oauth.redirectSignOut.split(',')[1]}`; // Use the [1] redirect URL for production
+    const signOutUri = `https://${awsExports.oauth.domain}/logout?client_id=${clientId}&logout_uri=${awsExports.oauth.redirectSignOut.split(',')[1]}`;
 
-    localStorage.clear();
-    logout();
-
+    logout(); // Clear cookies and update state
     window.location.href = signOutUri;
   };
 
@@ -35,7 +41,7 @@ function Navbar() {
       <ul className="navbar-links">
         <li><Link to="/">Home</Link></li>
         <li><Link to="/contact">Contact</Link></li>
-        {authenticated ? (
+        {isAuthenticated ? (
           <>
             <li><Link to="/account">Account</Link></li>
             <li>

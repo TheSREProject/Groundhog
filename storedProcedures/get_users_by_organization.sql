@@ -13,14 +13,7 @@ DECLARE
     org_id INTEGER;
 BEGIN
     -- Check if the caller has the required permission 'get_users_by_organization'
-    IF NOT EXISTS (
-        SELECT 1
-        FROM roles r
-        JOIN user_roles ur ON ur.role_id = r.role_id
-        JOIN permissions p ON p.permission_id = ANY (r.permission_id)
-        WHERE ur.cognito_user_id = v_cognito_user_id
-        AND p.permission_name = 'get_users_by_organization'
-    ) THEN
+    IF NOT check_user_permission(v_cognito_user_id, 'get_users_by_organization') THEN
         RAISE EXCEPTION 'Permission denied: Missing get_users_by_organization permission for user %', v_cognito_user_id;
     END IF;
 
